@@ -275,4 +275,9 @@ def run_yara_malware_scanner_on_disk_image(file_id: int):
 
 
 if __name__ == "__main__":
-    mcp.run()
+    mcp.run(
+      transport="http",
+      host="0.0.0.0",
+      port=8081,
+      log_level="debug"
+    )

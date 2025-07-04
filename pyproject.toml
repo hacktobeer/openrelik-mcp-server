@@ -5,7 +5,7 @@ description = "OpenRelik MCP Server"
 authors = [{ name = "Johan Berggren", email = "jberggren@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["fastmcp>=2.6.1", "openrelik-api-client>=0.2.4"]
+dependencies = ["fastmcp>=2.10.1", "openrelik-api-client>=0.2.4"]
 
 [project.scripts]
 openrelik-mcp-server = "openrelik_mcp_server:main"
