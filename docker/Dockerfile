@@ -25,4 +25,4 @@ ENV PYTHONPATH /app
 # CMD ["sleep", "infinity"]
 
 # Can be replaced with the following to run directly:
-CMD ["uv", "run", "python", "main.py"]
+CMD ["uv", "run", "fastmcp", "run", "main.py", "--transport", "http", "--host", "0.0.0.0", "--port", "8081"]
