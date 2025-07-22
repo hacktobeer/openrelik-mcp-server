@@ -30,8 +30,8 @@ logger = logging.getLogger(__name__)
 
 # Workaround for https://github.com/google/adk-python/issues/743
 # TODO: Remove this workaround when the issue is fixed and use env variables directly.
-OPENRELIK_API_URL = os.getenv("OPENRELIK_API_URL")
-OPENRELIK_API_KEY = os.getenv("OPENRELIK_API_KEY")
+OPENRELIK_API_URL = if os.getenv("OPENRELIK_API_URL") else sys.argv[1]
+OPENRELIK_API_KEY = if os.getenv("OPENRELIK_API_KEY") else sys.argv[2]
 
 # Create the API client. It will handle token refreshes automatically.
 api_client = APIClient(OPENRELIK_API_URL, OPENRELIK_API_KEY)
