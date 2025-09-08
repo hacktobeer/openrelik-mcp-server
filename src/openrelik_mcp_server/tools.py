@@ -13,8 +13,8 @@
 # limitations under the License.
 """Tools for OpenRelik MCP server."""
 
-import base64
 import json
+import os
 import time
 from typing import Any
 from venv import logger
@@ -28,7 +28,7 @@ from .utils import get_openrelik_client
 mcp = FastMCP("OpenRelik MCP Server")
 
 # This file contains the artifacts that image_export.py supports. We load them in at the start of the MCP server.
-ARTIFACT_FILE = "artifacts.txt"
+ARTIFACT_FILE = os.getenv("OPENRELIK_ARTIFACTS_FILE") or "artifacts.txt"
 
 ARTIFACTS_SUPPORTED = ""
 with open(ARTIFACT_FILE, "r") as f:
@@ -159,7 +159,7 @@ def read_file_content(file_id: int) -> bytes | str:
         return f"Error read_file_content: Filesize too big (max 5MB) - {filesize}"
 
     response = api_client.get(f"/files/{file_id}/download")
-    return base64.b64decode(response.content)
+    return response.content
 
 
 @mcp.tool()
