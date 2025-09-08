@@ -35,13 +35,14 @@ with open(ARTIFACT_FILE, "r") as f:
     ARTIFACTS_SUPPORTED = f.read()
 
 ## Define the below templates in your OpenRelik setup and update the template IDs below
+## Templates can be listed at http://[openrelik-server]:8710/api/v1/docs#/workflows/get_workflow_templates_workflows_templates__get
 ## TODO(rbdebeer) - implement dynamic template creation based on json specs once Relik API lands.
 # Yara-worker (with mount option enabled)
-TEMPLATE_ID_YARA = 9
+TEMPLATE_ID_YARA = 21
 # Extraction worker with dummy "SshdConfigFile" artifact selected.
-TEMPLATE_ID_ARTIFACT_EXTRACT = 5
+TEMPLATE_ID_ARTIFACT_EXTRACT = 19
 # Extraction worker with "<FILEPATH>" marker in filename field
-TEMPLATE_ID_FILE_EXTRACT = 6
+TEMPLATE_ID_FILE_EXTRACT = 18
 
 
 def execute_workflow(template_id, source_ids, template_data={}):
@@ -154,7 +155,7 @@ def read_file_content(file_id: int) -> bytes | str:
 
     api_client = get_openrelik_client()
     metadata = api_client.get(f"/files/{file_id}")
-    filesize = metadata.get("filesize")
+    filesize = json.loads(metadata.content).get("filesize")
     if filesize and int(filesize) > MAX_FILESIZE:
         return f"Error read_file_content: Filesize too big (max 5MB) - {filesize}"
 
