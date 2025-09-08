@@ -169,8 +169,8 @@ def extract_file_from_disk_image(file_names: str, file_id: int):
     You can give one or more filenames (comma seperated) to be extracted from a disk
     image referenced with a file_id.
     NOTE: the filename should be a filenames only (multiple filesnames can be comma seperated),
-    without the path component. For example, if you want
-    to extract "/etc/ssh/sshd_config" you would give the file_name "sshd_config".
+    without the path component. For example, if you want to extract "/etc/ssh/sshd_config" you
+    would give the file_name "sshd_config".
     On success returns a JSON string with the workflow results including output files (output_files)
     with their file id (id), folder location (folder_id) and display name (display_name).
     On failure returns a JSON string with the error (error_exception).
@@ -189,6 +189,18 @@ def extract_file_from_disk_image(file_names: str, file_id: int):
     template_data = {"<FILEPATH>": file_names}
 
     return execute_workflow(TEMPLATE_ID, [file_id], template_data)
+
+
+@mcp.tool()
+def get_supported_extraction_artifacts():
+    """
+    Gets the supported artifact (artifact_name) that can be used by the
+    `extract_artifact_from_disk_image` tool.
+    Always returns a list of supported artifact names.
+
+    Returns: A list of supported artifact names.
+    """
+    return ARTIFACTS_SUPPORTED
 
 
 @mcp.tool()
@@ -222,18 +234,6 @@ def extract_artifacts_from_disk_image(artifact_names: str, file_id: int):
     template_data = {"SshdConfigFile": artifact_names}
 
     return execute_workflow(TEMPLATE_ID, [file_id], template_data)
-
-
-@mcp.tool()
-def get_supported_extraction_artifacts():
-    """
-    Gets the supported artifact (artifact_name) that can be used by the
-    `extract_artifact_from_disk_image` tool.
-    Always returns a list of supported artifact names.
-
-    Returns: A list of supported artifact names.
-    """
-    return ARTIFACTS_SUPPORTED
 
 
 @mcp.tool()
