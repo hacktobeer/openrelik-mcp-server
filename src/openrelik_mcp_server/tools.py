@@ -1,3 +1,18 @@
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Tools for OpenRelik MCP server."""
+
 import base64
 import json
 import time
@@ -6,14 +21,11 @@ from venv import logger
 
 import openrelik_api_client.workflows as workflowapi
 
-from .utils import get_openrelik_client
-
 from fastmcp import FastMCP
 
+from .utils import get_openrelik_client
 
-mcp = FastMCP(
-    "OpenRelik MCP Server",
-)
+mcp = FastMCP("OpenRelik MCP Server")
 
 # This file contains the artifacts that image_export.py supports. We load them in at the start of the MCP server.
 ARTIFACT_FILE = "artifacts.txt"
@@ -101,7 +113,8 @@ def list_folder(folder_id: int) -> list[dict[str, Any]]:
         - filesize: The size of the file in bytes
         - magic_mime: The mime type of the file
     """
-    response = get_openrelik_client().get(f"/folders/{folder_id}/files/")
+    api_client = get_openrelik_client()
+    response = api_client.get(f"/folders/{folder_id}/files/")
     return response.json()
 
 
@@ -121,13 +134,15 @@ def read_file_metadata(file_id: int) -> dict[str, Any]:
         - magic_mime: The mime type of the file
         - hash_*: Several calculated unique forensic file hashes
     """
-    response = get_openrelik_client().get(f"/files/{file_id}")
+    api_client = get_openrelik_client()
+    response = api_client.get(f"/files/{file_id}")
     return response.json()
 
 
 @mcp.tool()
-def read_file_content(file_id: int) -> bytes:
-    """Reads the content of a file in OpenRelik. Always returns the file content.
+def read_file_content(file_id: int) -> bytes | str:
+    """Reads the content of a file in OpenRelik. Returns the file content or
+    an error if the filesize is too big (> 5MB)
 
     Args:
         file_id: The ID of the file to read the content from.
@@ -135,7 +150,15 @@ def read_file_content(file_id: int) -> bytes:
     Returns:
         The content of the file.
     """
-    response = get_openrelik_client().get(f"/files/{file_id}/download")
+    MAX_FILESIZE = 5_000_000  # 5MB
+
+    api_client = get_openrelik_client()
+    metadata = api_client.get(f"/files/{file_id}")
+    filesize = metadata.get("filesize")
+    if filesize and int(filesize) > MAX_FILESIZE:
+        return f"Error read_file_content: Filesize too big (max 5MB) - {filesize}"
+
+    response = api_client.get(f"/files/{file_id}/download")
     return base64.b64decode(response.content)
 
 
