@@ -14,16 +14,18 @@
 """Tools for OpenRelik MCP server."""
 
 import json
+import logging
 import os
 import time
 from typing import Any
-from venv import logger
 
 import openrelik_api_client.workflows as workflowapi
 
 from fastmcp import FastMCP
 
 from .utils import get_openrelik_client
+
+logger = logging.getLogger(__name__)
 
 mcp = FastMCP("OpenRelik MCP Server")
 
