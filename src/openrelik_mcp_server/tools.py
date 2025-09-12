@@ -42,9 +42,9 @@ with open(ARTIFACT_FILE, "r") as f:
 # Yara-worker (with mount option enabled)
 TEMPLATE_ID_YARA = 21
 # Extraction worker with dummy "SshdConfigFile" artifact selected.
-TEMPLATE_ID_ARTIFACT_EXTRACT = 19
+TEMPLATE_ID_ARTIFACT_EXTRACT = 2
 # Extraction worker with "<FILEPATH>" marker in filename field
-TEMPLATE_ID_FILE_EXTRACT = 18
+TEMPLATE_ID_FILE_EXTRACT = 1
 
 
 def execute_workflow(template_id, source_ids, template_data={}):
