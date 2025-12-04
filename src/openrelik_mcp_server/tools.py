@@ -15,7 +15,6 @@
 
 import json
 import logging
-import os
 import time
 from typing import Any
 
@@ -23,28 +22,39 @@ import openrelik_api_client.workflows as workflowapi
 
 from fastmcp import FastMCP
 
+from .artifacts import IMAGE_EXPORT_ARTIFACTS
 from .utils import get_openrelik_client
 
 logger = logging.getLogger(__name__)
 
 mcp = FastMCP("OpenRelik MCP Server")
 
-# This file contains the artifacts that image_export.py supports. We load them in at the start of the MCP server.
-ARTIFACT_FILE = os.getenv("OPENRELIK_ARTIFACTS_FILE") or "artifacts.txt"
-
-ARTIFACTS_SUPPORTED = ""
-with open(ARTIFACT_FILE, "r") as f:
-    ARTIFACTS_SUPPORTED = f.read()
-
-## Define the below templates in your OpenRelik setup and update the template IDs below
+## Create the below workflow templates in your OpenRelik setup and update the template names below
 ## Templates can be listed at http://[openrelik-server]:8710/api/v1/docs#/workflows/get_workflow_templates_workflows_templates__get
-## TODO(rbdebeer) - implement dynamic template creation based on json specs once Relik API lands.
 # Yara-worker (with mount option enabled)
-TEMPLATE_ID_YARA = 21
+TEMPLATE_YARA = "mcp_run_yara_scanner"
 # Extraction worker with dummy "SshdConfigFile" artifact selected.
-TEMPLATE_ID_ARTIFACT_EXTRACT = 2
+TEMPLATE_ARTIFACT_EXTRACT = "mcp_extract_artifacts"
 # Extraction worker with "<FILEPATH>" marker in filename field
-TEMPLATE_ID_FILE_EXTRACT = 1
+TEMPLATE_FILE_EXTRACT = "mcp_extract_filenames"
+
+
+def get_template_id_by_name(template_name: str) -> id:
+    """Get the template ID from the template name.
+
+    Args:
+        template_name: The name of the template to get the ID from.
+    Returns:
+        The ID of the template.
+    """
+    response = get_openrelik_client().get("/workflows/templates/")
+    decoded = json.loads(response.content)
+    templates = [(i["id"], i["display_name"]) for i in decoded if not i["is_deleted"]]
+    ids = [i for i, f in templates if f == template_name]
+    if ids:
+        return ids[0]
+
+    return None
 
 
 def execute_workflow(template_id, source_ids, template_data={}):
@@ -53,12 +63,9 @@ def execute_workflow(template_id, source_ids, template_data={}):
     file = json.loads(response.content)
     folder_id = int(file["folder"]["id"])
 
-    # TODO(rbdebeer) - uncomment when correct subfolders have been implemented.
-    # # Create folder
-    # folder_id = folderapi.FoldersAPI(api_client).create_subfolder(
-    #     root_folder_id, "extract_files"
-    # )
-    # logger.info(f"Folder created {folder_id}")
+    # Check template ID
+    if not template_id:
+        return "Error: template_id is None, possibly template does not exist in OpenRelik!!"
 
     # Create workflow from TEMPLATE_ID
     workflow_id = workflowapi.WorkflowsAPI(get_openrelik_client()).create_workflow(
@@ -187,7 +194,7 @@ def extract_file_from_disk_image(file_names: str, file_id: int):
         with their file id (id), folder location (folder_id) and display name (display_name).
     """
 
-    TEMPLATE_ID = TEMPLATE_ID_FILE_EXTRACT
+    TEMPLATE_ID = get_template_id_by_name(TEMPLATE_FILE_EXTRACT)
 
     template_data = {"<FILEPATH>": file_names}
 
@@ -203,7 +210,7 @@ def get_supported_extraction_artifacts():
 
     Returns: A list of supported artifact names.
     """
-    return ARTIFACTS_SUPPORTED
+    return IMAGE_EXPORT_ARTIFACTS
 
 
 @mcp.tool()
@@ -232,7 +239,7 @@ def extract_artifacts_from_disk_image(artifact_names: str, file_id: int):
         with their file id (id), folder location (folder_id) and display name (display_name).
 
     """
-    TEMPLATE_ID = TEMPLATE_ID_ARTIFACT_EXTRACT
+    TEMPLATE_ID = get_template_id_by_name(TEMPLATE_ARTIFACT_EXTRACT)
 
     template_data = {"SshdConfigFile": artifact_names}
 
@@ -257,6 +264,6 @@ def run_yara_malware_scanner_on_disk_image(file_id: int):
         output files (output_files) with their file id (id), folder location (folder_id)
         and display name (display_name).
     """
-    TEMPLATE_ID = TEMPLATE_ID_YARA
+    TEMPLATE_ID = get_template_id_by_name(TEMPLATE_YARA)
 
     return execute_workflow(TEMPLATE_ID, [file_id])
