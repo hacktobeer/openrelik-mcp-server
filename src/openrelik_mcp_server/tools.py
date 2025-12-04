@@ -37,6 +37,8 @@ TEMPLATE_YARA = "mcp_run_yara_scanner"
 TEMPLATE_ARTIFACT_EXTRACT = "mcp_extract_artifacts"
 # Extraction worker with "<FILEPATH>" marker in filename field
 TEMPLATE_FILE_EXTRACT = "mcp_extract_filenames"
+# Timeline workflow using the log2timeline -> psort workers
+TEMPLATE_TIMELINE = "mcp_create_timeline"
 
 
 def get_template_id_by_name(template_name: str) -> id:
@@ -265,5 +267,27 @@ def run_yara_malware_scanner_on_disk_image(file_id: int):
         and display name (display_name).
     """
     TEMPLATE_ID = get_template_id_by_name(TEMPLATE_YARA)
+
+    return execute_workflow(TEMPLATE_ID, [file_id])
+
+
+@mcp.tool()
+def create_forensic_timeline(file_id: int):
+    """
+    Run log2timeline on a disk image to create a forensic timeline in .plaso and .csv format.
+
+    On success returns a JSON string with the workflow results including output files (output_files)
+    with their file id (id), folder location (folder_id) and display name (display_name).
+    On failure returns a JSON string with the error (error_exception).
+
+    Args:
+        file_id: The file_id of the disk image to create the timeline from.
+
+    Returns:
+        A JSON string with the workflow results including the .plaso and .csv timeline output
+        files (output_files) with their file id (id), folder location (folder_id)
+        and display name (display_name).
+    """
+    TEMPLATE_ID = get_template_id_by_name(TEMPLATE_TIMELINE)
 
     return execute_workflow(TEMPLATE_ID, [file_id])
