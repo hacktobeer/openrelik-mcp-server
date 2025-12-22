@@ -15,6 +15,7 @@
 
 import json
 import logging
+import re
 import time
 from typing import Any
 
@@ -162,6 +163,59 @@ def read_file_content(file_id: int) -> bytes | str:
 
     response = api_client.get(f"/files/{file_id}/download")
     return response.content
+
+
+def get_files_recursive(
+    root_folder_id: int,
+    filename_regex: str,
+    api_client: Any | None,
+) -> list[dict[str, Any]]:
+    """
+    Helper function to list files recursively in an OpenRelik folder filtering on a filename regular expression.
+    """
+    if not api_client:
+        api_client = get_openrelik_client()
+
+    response = api_client.get(f"/folders/{root_folder_id}/files/")
+    files = response.json()
+    all_files = []
+
+    pattern = re.compile(filename_regex)
+    for file in files:
+        if pattern.search(file["display_name"]):
+            all_files.append(file)
+
+    subfolders = api_client.get(f"/folders/{root_folder_id}/folders/").json()
+    for folder in subfolders:
+        subfolder = folder["id"]
+        files_from_subfolder = get_files_recursive(
+            subfolder, filename_regex, api_client
+        )
+        all_files.extend(files_from_subfolder)
+
+    return all_files
+
+
+@mcp.tool()
+def find_files_recursive(
+    root_folder_id: int,
+    filename_regex: str,
+) -> list[dict[str, Any]]:
+    """
+    Lists files recursively in an OpenRelik folder filtering on a filename regular expression.
+    Always returns a JSON string with the list of files with their metadata.
+
+    Args:
+        folder_id: The ID of the folder to list the files from.
+        filename_regex: The (python "re" compatible) regular expression to filter the filenames on.
+
+    Returns:
+        A list of dictionaries containing file metadata, including:
+        - display_name: The name of the file
+        - filesize: The size of the file in bytes
+        - magic_mime: The mime type of the file
+    """
+    return get_files_recursive(root_folder_id, filename_regex, None)
 
 
 @mcp.tool()
