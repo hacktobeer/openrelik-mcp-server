@@ -188,7 +188,7 @@ def extract_file_from_disk_image(file_names: str, file_id: int):
     On failure returns a JSON string with the error (error_exception).
 
     Args:
-        file_names:
+        file_names: The files to extract based on filenames. Comma separated for multiple files.
         file_id: The file_id of the disk image to extract files from.
 
     Returns:
