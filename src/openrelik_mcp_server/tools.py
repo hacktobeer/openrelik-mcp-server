@@ -59,7 +59,7 @@ def get_template_id_by_name(template_name: str) -> id:
     return None
 
 
-def execute_workflow(template_id, source_ids, template_data={}):
+def execute_workflow(template_id: int, source_ids: list[int], template_data: dict = {}):
     # Get folder_id from 1st source_id
     response = get_openrelik_client().get(f"/files/{source_ids[0]}")
     file = json.loads(response.content)
