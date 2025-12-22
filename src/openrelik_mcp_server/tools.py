@@ -33,9 +33,9 @@ mcp = FastMCP("OpenRelik MCP Server")
 ## Templates can be listed at http://[openrelik-server]:8710/api/v1/docs#/workflows/get_workflow_templates_workflows_templates__get
 # Yara-worker (with mount option enabled)
 TEMPLATE_YARA = "mcp_run_yara_scanner"
-# Extraction worker with dummy "SshdConfigFile" artifact selected.
+# Extraction worker for artifact extraction
 TEMPLATE_ARTIFACT_EXTRACT = "mcp_extract_artifacts"
-# Extraction worker with "<FILEPATH>" marker in filename field
+# Extraction worker for file extraction
 TEMPLATE_FILE_EXTRACT = "mcp_extract_filenames"
 # Timeline workflow using the log2timeline -> psort workers
 TEMPLATE_TIMELINE = "mcp_create_timeline"
@@ -59,7 +59,9 @@ def get_template_id_by_name(template_name: str) -> id:
     return None
 
 
-def execute_workflow(template_id: int, source_ids: list[int], template_data: dict = {}):
+def execute_workflow(
+    template_id: int, source_ids: list[int], template_params: dict = {}
+):
     # Get folder_id from 1st source_id
     response = get_openrelik_client().get(f"/files/{source_ids[0]}")
     file = json.loads(response.content)
@@ -71,24 +73,12 @@ def execute_workflow(template_id: int, source_ids: list[int], template_data: dic
 
     # Create workflow from TEMPLATE_ID
     workflow_id = workflowapi.WorkflowsAPI(get_openrelik_client()).create_workflow(
-        folder_id, source_ids, template_id
+        folder_id, source_ids, template_id, template_params
     )
 
     if workflow_id is None:
         return "Error creating OpenRelik workflow!"
     logger.info(f"Workflow ID: {workflow_id}")
-
-    # Get workflow
-    workflow = workflowapi.WorkflowsAPI(get_openrelik_client()).get_workflow(
-        folder_id, workflow_id
-    )
-
-    # Update workflow with template markers to be replaced
-    for key, value in template_data.items():
-        workflow["spec_json"] = workflow["spec_json"].replace(key, value)
-    workflowapi.WorkflowsAPI(get_openrelik_client()).update_workflow(
-        folder_id, workflow_id, workflow
-    )
 
     # Run workflow
     workflowapi.WorkflowsAPI(get_openrelik_client()).run_workflow(
@@ -198,7 +188,7 @@ def extract_file_from_disk_image(file_names: str, file_id: int):
 
     TEMPLATE_ID = get_template_id_by_name(TEMPLATE_FILE_EXTRACT)
 
-    template_data = {"<FILEPATH>": file_names}
+    template_data = {"filenames_0": file_names}
 
     return execute_workflow(TEMPLATE_ID, [file_id], template_data)
 
@@ -243,7 +233,7 @@ def extract_artifacts_from_disk_image(artifact_names: str, file_id: int):
     """
     TEMPLATE_ID = get_template_id_by_name(TEMPLATE_ARTIFACT_EXTRACT)
 
-    template_data = {"SshdConfigFile": artifact_names}
+    template_data = {"artifacts_0": artifact_names.split(",")}
 
     return execute_workflow(TEMPLATE_ID, [file_id], template_data)
 

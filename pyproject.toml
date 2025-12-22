@@ -6,7 +6,7 @@ authors = [{ name = "Johan Berggren", email = "jberggren@gmail.com" },
            { name = "Ramses de Beer", email = "ramsesdebeer@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["fastmcp>=2.10.1", "openrelik-api-client>=0.2.4"]
+dependencies = ["fastmcp>=2.10.1", "openrelik-api-client>=0.5.0"]
 
 [project.scripts]
 openrelik-mcp-server = "openrelik_mcp_server:main"

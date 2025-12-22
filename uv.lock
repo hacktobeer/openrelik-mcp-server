@@ -434,15 +434,15 @@ wheels = [
 
 [[package]]
 name = "openrelik-api-client"
-version = "0.2.4"
+version = "0.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "requests" },
     { name = "requests-toolbelt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/be/a1/1e5109e9559b4fe65a8c46df646e8d100d5cc5aadba44f303d5a015fe42f/openrelik_api_client-0.2.4.tar.gz", hash = "sha256:a908b761514c9370d0b99e9d331825b5ec67a2f739068e7d8f2b8515a54bd9ff", size = 10380, upload-time = "2025-05-28T08:57:06.855Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/dc/5f/a4a8a2b258c0f970542f974d07bb196a79bd7855387216781fec657ce491/openrelik_api_client-0.5.0.tar.gz", hash = "sha256:e6985a52c88ff6277bb15332aef4c6f40ba33b0cb7b889754386f9dfa678bc3a", size = 11885, upload-time = "2025-10-15T13:23:28.233Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/77/17/b7191ccfd70d3c0e13ddabe540b955f84c28a7389bbd31caa4a946012712/openrelik_api_client-0.2.4-py3-none-any.whl", hash = "sha256:24e4f0a4d1853469986f4121cd8c35410fc729f1898ddc1c1f691124b00506b3", size = 13930, upload-time = "2025-05-28T08:57:05.29Z" },
+    { url = "https://files.pythonhosted.org/packages/90/c6/07ab49368c3e1ec91f88942ef3883985052a34fd001623426705940d58f0/openrelik_api_client-0.5.0-py3-none-any.whl", hash = "sha256:50bc19f5ae3c2c3126bbe72f27983f477230c29dc254eaf32aada59a263c5b92", size = 16832, upload-time = "2025-10-15T13:23:26.906Z" },
 ]
 
 [[package]]
@@ -462,7 +462,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "fastmcp", specifier = ">=2.10.1" },
-    { name = "openrelik-api-client", specifier = ">=0.2.4" },
+    { name = "openrelik-api-client", specifier = ">=0.5.0" },
 ]
 
 [package.metadata.requires-dev]
