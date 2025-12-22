@@ -1,6 +1,6 @@
 services:
   openrelik-mcp-server:
-    image: openrelik-mcp-server:latest
+    image: ghcr.io/openrelik/openrelik-mcp-server:latest
     restart: always
     ports:
       - 7070:7070
