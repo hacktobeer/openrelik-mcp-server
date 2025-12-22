@@ -178,9 +178,9 @@ def read_file_content(file_id: int) -> bytes | str:
 def extract_file_from_disk_image(file_names: str, file_id: int):
     """
     Extracts files from a disk image.
-    You can give one or more filenames (comma seperated) to be extracted from a disk
+    You can give one or more filenames (comma separated) to be extracted from a disk
     image referenced with a file_id.
-    NOTE: the filename should be a filenames only (multiple filesnames can be comma seperated),
+    NOTE: the filename should be a filenames only (multiple filenames can be comma separated),
     without the path component. For example, if you want to extract "/etc/ssh/sshd_config" you
     would give the file_name "sshd_config".
     On success returns a JSON string with the workflow results including output files (output_files)
