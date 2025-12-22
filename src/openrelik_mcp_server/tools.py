@@ -203,7 +203,6 @@ def find_files_recursive(
 ) -> list[dict[str, Any]]:
     """
     Lists files recursively in an OpenRelik folder filtering on a filename regular expression.
-    Always returns a JSON string with the list of files with their metadata.
 
     Args:
         folder_id: The ID of the folder to list the files from.
