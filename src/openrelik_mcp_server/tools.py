@@ -15,11 +15,15 @@
 
 import json
 import logging
+import os
+import pathlib
 import re
 import time
 from typing import Any
 
 import openrelik_api_client.workflows as workflowapi
+import openrelik_api_client.files as filesapi
+import openrelik_api_client.folders as foldersapi
 
 from fastmcp import FastMCP
 
@@ -317,14 +321,14 @@ def run_yara_malware_scanner_on_disk_image(file_id: int):
 @mcp.tool()
 def create_forensic_timeline(file_id: int):
     """
-    Run log2timeline on a disk image to create a forensic timeline in .plaso and .csv format.
+    Run log2timeline on a file to create a forensic timeline in .plaso and .csv format.
 
     On success returns a JSON string with the workflow results including output files (output_files)
     with their file id (id), folder location (folder_id) and display name (display_name).
     On failure returns a JSON string with the error (error_exception).
 
     Args:
-        file_id: The file_id of the disk image to create the timeline from.
+        file_id: The file_id of the file to create the timeline from.
 
     Returns:
         A JSON string with the workflow results including the .plaso and .csv timeline output
@@ -334,3 +338,43 @@ def create_forensic_timeline(file_id: int):
     TEMPLATE_ID = get_template_id_by_name(TEMPLATE_TIMELINE)
 
     return execute_workflow(TEMPLATE_ID, [file_id])
+
+
+@mcp.tool()
+def upload_file(file_path: str, folder_id: int = None):
+    """
+    Upload a file from a given file path to OpenRelik into a folder.
+
+    On success returns a JSON string with thef file_id, folder_id and file_name.
+    On failure returns a string with the error (error_exception).
+
+    Args:
+        file_path: The path to the file to be uploaded.
+        folder_id: The folder id to upload the file to. If None, the file will be uploaded to a new folder.
+
+    Returns:
+        A JSON string with the file_id of the uploaded file, the folder_id it was uploaded to and the file_name.
+
+    """
+    if not os.path.exists(file_path):
+        return f"Error: file_path does not exist: {file_path}"
+
+    file_name = pathlib.Path(file_path).name
+    if folder_id is None:
+        folder_id = foldersapi.FoldersAPI(get_openrelik_client()).create_root_folder(
+            f"Uploaded {file_name}"
+        )
+
+    try:
+        file_id = filesapi.FilesAPI(get_openrelik_client()).upload_file(
+            file_path, folder_id
+        )
+    except Exception as e:
+        return f"Error: upload_file failed: {str(e)}"
+
+    ret = {
+        "file_id": file_id,
+        "folder_id": folder_id,
+        "display_name": file_name,
+    }
+    return json.dumps(ret)
