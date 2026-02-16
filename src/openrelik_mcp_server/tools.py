@@ -341,7 +341,7 @@ def create_forensic_timeline(file_id: int):
 
 
 @mcp.tool()
-def upload_file(file_path: str, folder_id: int | None = None):
+def upload_file(file_path: str, folder_id: int | None = None) -> str:
     """
     Upload a file from a given file path to OpenRelik into a folder.
 
